@@ -33,32 +33,47 @@ public class Login extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)  
             throws ServletException, IOException {  
       
+		Connection con = DBConnection.getConnection();
         response.setContentType("text/html");  
         PrintWriter out = response.getWriter();  
-              
         String username=request.getParameter("username");  
-        String password=request.getParameter("password");  
-        Connection con = DBConnection.getConnection();
+        String password=request.getParameter("password");
         PreparedStatement stmt;
-    	try {
-    		stmt = con.prepareStatement("SELECT * FROM user_details WHERE username = ? AND password = ?");
+        try {
+    		stmt = con.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?");
     		stmt.setString(1, username);
     		stmt.setString(2, password);
     		ResultSet set = stmt.executeQuery();
     	    if(set.next()){
-    	    	RequestDispatcher rd=request.getRequestDispatcher("Dashboard.html");
-    	         rd.forward(request,response);  
+    	    	request.getSession().setAttribute("user", username);
+    	    	request.setAttribute("title", "Dashboard");
+    			request.getRequestDispatcher("Dashboard.jsp").forward(request, response); 
     	     }  
     	     else{
-    	    	RequestDispatcher rd=request.getRequestDispatcher("Login.html");
-    	    	rd.include(request, response);
-    	    	out.print("invalid credentials");
+    	    	 request.setAttribute("error", "Invalid credentials.");
+    	    	 request.getRequestDispatcher("Login1.jsp").forward(request, response);
     	     }  
     	    out.close();
     	} catch (SQLException e) {
     		// TODO Auto-generated catch block
-    		e.printStackTrace();
+    		System.out.println("Exception occured.");
+    		System.out.println(e.getMessage());
     	}
           
-    }   
+    }
+    public void doGet(HttpServletRequest request , HttpServletResponse response)
+    	throws ServletException, IOException {
+    		if(request.getSession().getAttribute("user") != null) {
+    			String title = "Dashboard";
+    			request.setAttribute("title",title);
+    			//request.getRequestDispatcher("Dashboard.jsp").forward(request, response);
+    			request.setAttribute("title", "Dashboard");
+    			request.getRequestDispatcher("Dashboard.jsp").forward(request, response);
+    			
+    		}
+    		else {
+    	    	response.sendRedirect("Login1.jsp");
+    		}
+    	
+    }
 }

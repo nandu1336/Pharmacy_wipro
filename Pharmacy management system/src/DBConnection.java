@@ -1,6 +1,8 @@
 import java.sql.*;
 public class DBConnection {
 	 static Connection con=null;
+	  static	String drugTable = "drug_details";
+	  static String userTable = "users";
 	    public static Connection getConnection()
 	    {
 	        if (con != null) return con;
